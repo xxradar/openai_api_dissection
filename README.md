@@ -104,33 +104,51 @@ jq -r '.paths | keys[]' openapi.json | nl -w2 -s'. '
 84. /vector_stores/{vector_store_id}/files/{file_id}/content
 85. /vector_stores/{vector_store_id}/search
 ```
-## Make your selection
+## Pick an endpoint
 ```
-CHOICE=58 SELECTED=$(jq -r '.paths | keys[]' openapi.json | sed -n "${CHOICE}p")
+NUM=9 ENDPOINT=$(jq -r '.paths | keys[]' openapi.json | sed -n "${NUM}p")
 ```
 ```
-echo $SELECTED
+echo $ENDPOINT
 ```
 
-## Steps to make `curl` request
+## Pick a method
 ```
-METHODS=$(jq -r --arg path "$SELECTED" '.paths[$path] | keys[]' openapi.json)
-
-echo "Available methods for $SELECTED:"
-echo "$METHODS"
+jq -r --arg path "$ENDPOINT" '.paths[$path] | keys[]' openapi.json
 ```
 ```
-METHOD="get"  # You can change this or make it dynamic if needed
+METHOD="post"
+```
 
-PARAMS=$(jq -r --arg path "$SELECTED" --arg method "$METHOD" '
-  if .paths[$path][$method]?.parameters then
-    .paths[$path][$method].parameters[] |
-    "\(.name) [\(.in)] - required: \(.required) - \(.description // "no description")"
-  else
-    "No parameters found for method \($method) at path \($path)"
-  end
-' openapi.json)
-
-echo "Parameters for $METHOD $SELECTED:"
-echo "$PARAMS"
+## extract the REF
+```
+REF=$(jq -r --arg path "$ENDPOINT" --arg method "$METHOD" \
+  '.paths[$path][$method].requestBody.content["application/json"].schema["$ref"]' openapi.json)
+```
+## extract the SCHEMA
+```
+SCHEMA_NAME=$(echo "$REF" | sed 's|#/components/schemas/||')
+```
+```
+SCHEMA_JSON=$(jq --arg name "$SCHEMA_NAME" '.components.schemas[$name]' openapi.json)
+```
+```
+echo "$SCHEMA_JSON" | jq .
+```
+## Extract
+```
+COMBINED_JSON=$(jq -n \
+  --arg method "$METHOD" \
+  --arg endpoint "$ENDPOINT" \
+  --arg baseurl "$BASEURL" \
+  --argjson schema "$SCHEMA_JSON" \
+  '{
+    method: $method,
+    endpoint: $endpoint,
+    baseurl: $baseurl,
+    schema: $schema
+  }')
+```
+```
+echo "$COMBINED_JSON" | jq .
 ```
