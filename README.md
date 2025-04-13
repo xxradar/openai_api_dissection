@@ -6,6 +6,10 @@ curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/maste
 ```
 yq eval -o=json '.' openapi.yaml | jq .
 ```
+Cleaning it ..
+```
+sed 's/[^[:print:]\t]//g' openapi.json > openapi_clean.json
+```
 ## Extract the BASEURL
 ```
 BASEURL=$(jq -r '.servers[0].url' openapi.json)
