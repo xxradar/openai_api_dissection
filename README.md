@@ -153,7 +153,7 @@ export COMBINED_JSON=$(jq -n \
 ```
 echo "$COMBINED_JSON" | jq .
 ```
-## Python code
+## Python code `curl` generator
 ```
 python3 test.py
 ```
