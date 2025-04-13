@@ -181,10 +181,15 @@ def main():
 
     # Construct the prompt for the model
     prompt = (
-        "Given the following JSON payload intended for the OpenAI API:\n\n"
+        "You are a command-line assistant.\n\n"
+        "I will provide you with a JSON object: \n\n"
         f"{combined_json}\n\n"
-        "Generate the corresponding curl command that uses the API key stored in the "
-        "OPENAI_API_KEY environment variable."
+        "Craft a curl command based on this. \n" 
+        "The Bearer token is in $OPENAI_API_KEY\n"
+        "Do not use placeholders, use the actual values.\n"
+        "verify closly there are no quotning issues.\n"
+        "use model gpt-4o by default"
+
     )
 
     try:
@@ -208,4 +213,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 ```
