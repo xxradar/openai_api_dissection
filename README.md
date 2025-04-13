@@ -3,7 +3,7 @@
 ```
 curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml
 ```
-## convert if necessary
+## Convert if necessary
 ```
 yq eval -o=json '.' openapi.yaml | jq . > openapi.json
 ```
