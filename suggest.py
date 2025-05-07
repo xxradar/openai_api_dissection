@@ -28,15 +28,15 @@ def main():
         "The Bearer token is in $OPENAI_API_KEY\n"
         "Do not use placeholders, use the actual values.\n"
         "verify closly there are no quotning issues.\n"
-        "Always use model gpt-4o \n"
-        "Pay attention to embedding, then use text-embedding-ada-002. \n"
-        "only use required parameters.\n"
+        "Always suggest - if required - model gpt-4o \n"
+        "For embedding related suggestions use text-embedding-ada-002. \n"
+        "Only use required parameters in payloads.\n"
     )
 
     try:
         # Make a request to the OpenAI Chat Completions API
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that generates curl commands."},
                 {"role": "user", "content": prompt}
