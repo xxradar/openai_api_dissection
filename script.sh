@@ -2,13 +2,16 @@
 
 set -e
 
-# Step 1: Get OpenAPI spec
-echo "Downloading OpenAI OpenAPI spec..."
-curl -s -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml
+if [ -f "openapi.json" ]; then
+  echo "✅ openapi.json already exists. Skipping download and conversion."
+else
+  echo "📥 Downloading OpenAI OpenAPI spec..."
+  curl -s -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml
 
-# Step 2: Convert YAML to JSON
-echo "Converting YAML to JSON..."
-yq eval -o=json '.' openapi.yaml | jq . > openapi.json
+  echo "🔄 Converting YAML to JSON..."
+  yq eval -o=json '.' openapi.yaml | jq . > openapi.json
+  echo "✅ Conversion complete: openapi.json created."
+fi
 
 # Step 3: Extract base URL
 BASEURL=$(jq -r '.servers[0].url' openapi.json)
