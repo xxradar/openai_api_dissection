@@ -1,7 +1,9 @@
 # How to get openapi calls
 ## Get the openapi spec file
 ```
-curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml
+curl -O [https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml](https://github.com/openai/openai-openapi/blob/manual_spec/openapi.yaml)
+<img width="589" height="39" alt="image" src="https://github.com/user-attachments/assets/5ebe1abf-06ae-44f2-b02d-a0834d7d9110" />
+
 ```
 ## Convert if necessary
 ```
