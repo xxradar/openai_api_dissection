@@ -1,7 +1,7 @@
 # How to get openapi calls
 ## Get the openapi spec file
 ```
-curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml
+curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/manual_spec/openapi.yaml
 ```
 ## Convert if necessary
 ```
