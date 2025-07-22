@@ -1,20 +1,33 @@
-# How to get openapi calls
-## Get the openapi spec file
+# OpenAI API Dissection Tool
+
+This tool helps you dissect the OpenAI API specification and generate curl commands for specific endpoints.
+
+## Prerequisites
+
+- Python 3.x
+- `yq` command-line tool
+- `jq` command-line tool
+- `curl`
+- OpenAI API key
+
+## How to get OpenAPI calls
+
+### Step 1: Get the OpenAPI spec file
 ```
-curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/manual_spec/openapi.yaml
+curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml
 ```
-## Convert if necessary
+### Step 2: Convert if necessary
 ```
 yq . openapi.yaml >openapi.json
 ```
-## Extract the BASEURL
+### Step 3: Extract the Base URL
 ```
 BASEURL=$(jq -r '.servers[0].url' openapi.json)
 ```
 ```
 echo $BASEURL
 ```
-## Extract the Endpoints
+### Step 4: Extract the Endpoints
 ```
 jq -r '.paths | keys[]' openapi.json | nl -w2 -s'. '
 ```
@@ -120,7 +133,7 @@ Available Endpoints:
 98. /vector_stores/{vector_store_id}/files/{file_id}/content
 99. /vector_stores/{vector_store_id}/search
 ```
-## Pick an endpoint
+### Step 5: Pick an endpoint
 ```
 NUM=9 ENDPOINT=$(jq -r '.paths | keys[]' openapi.json | sed -n "${NUM}p")
 ```
@@ -128,7 +141,7 @@ NUM=9 ENDPOINT=$(jq -r '.paths | keys[]' openapi.json | sed -n "${NUM}p")
 echo $ENDPOINT
 ```
 
-## Pick a method
+### Step 6: Pick a method
 ```
 jq -r --arg path "$ENDPOINT" '.paths[$path] | keys[]' openapi.json
 ```
@@ -136,12 +149,12 @@ jq -r --arg path "$ENDPOINT" '.paths[$path] | keys[]' openapi.json
 METHOD="post"
 ```
 
-## Extract the parameter REF
+### Step 7: Extract the parameter reference
 ```
 REF=$(jq -r --arg path "$ENDPOINT" --arg method "$METHOD" \
   '.paths[$path][$method].requestBody.content["application/json"].schema["$ref"]' openapi.json)
 ```
-## Extract the SCHEMA
+### Step 8: Extract the schema
 ```
 SCHEMA_NAME=$(echo "$REF" | sed 's|#/components/schemas/||')
 ```
@@ -151,7 +164,7 @@ SCHEMA_JSON=$(jq --arg name "$SCHEMA_NAME" '.components.schemas[$name]' openapi.
 ```
 echo "$SCHEMA_JSON" | jq .
 ```
-## Create a json summary
+### Step 9: Create a JSON summary
 ```
 export COMBINED_JSON=$(jq -n \
   --arg method "$METHOD" \
@@ -168,7 +181,29 @@ export COMBINED_JSON=$(jq -n \
 ```
 echo "$COMBINED_JSON" | jq .
 ```
-## Python code `curl` generator
+### Step 10: Generate curl command using Python
 ```
-python3 test.py
+python3 suggest.py
+```
+
+## Quick Start
+
+For an automated interactive experience, simply run:
+
+```bash
+./script.sh
+```
+
+This script will:
+1. Download the OpenAI OpenAPI specification
+2. Convert it to JSON format
+3. Present available endpoints for selection
+4. Allow you to choose an HTTP method
+5. Extract the required schema
+6. Generate a curl command using the OpenAI API
+
+Make sure to set your OpenAI API key as an environment variable:
+
+```bash
+export OPENAI_API_KEY="your-api-key-here"
 ```

@@ -15,22 +15,20 @@ def main():
         return
 
     # Initialize the OpenAI API client
-    # Explicitly set only the api_key to avoid any unexpected configuration issues
     client = OpenAI()
-    client.api_key = api_key
 
     # Construct the prompt for the model
     prompt = (
         "You are a command-line assistant.\n\n"
-        "I will provide you with a JSON object: \n\n"
+        "I will provide you with a JSON object containing API endpoint information:\n\n"
         f"{combined_json}\n\n"
-        "Craft a curl command based on this. \n" 
-        "The Bearer token is in $OPENAI_API_KEY\n"
-        "Do not use placeholders, use the actual values.\n"
-        "verify closly there are no quoting issues.\n"
-        "Always suggest - if required - model gpt-4o \n"
-        "For embedding related suggestions use text-embedding-ada-002. \n"
-        "Only use required parameters in payloads.\n"
+        "Generate a curl command based on this information:\n" 
+        "- Use Bearer token from $OPENAI_API_KEY\n"
+        "- Use actual values, not placeholders\n"
+        "- Verify closely there are no quoting issues\n"
+        "- For chat completions, suggest model 'gpt-4o'\n"
+        "- For embeddings, use model 'text-embedding-ada-002'\n"
+        "- Include only required parameters in the payload\n"
     )
 
     try:

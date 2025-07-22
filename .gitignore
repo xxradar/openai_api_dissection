@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# OpenAPI files
+openapi.yaml
+openapi.json
+
+# Environment variables
+.env
