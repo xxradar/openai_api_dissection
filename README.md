@@ -5,7 +5,7 @@ curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/manua
 ```
 ## Convert if necessary
 ```
-yq eval -o=json '.' openapi.yaml | jq . > openapi.json
+yq . openapi.yaml >openapi.json
 ```
 ## Extract the BASEURL
 ```
