@@ -27,7 +27,7 @@ def main():
         "Craft a curl command based on this. \n" 
         "The Bearer token is in $OPENAI_API_KEY\n"
         "Do not use placeholders, use the actual values.\n"
-        "verify closly there are no quotning issues.\n"
+        "verify closly there are no quoting issues.\n"
         "Always suggest - if required - model gpt-4o \n"
         "For embedding related suggestions use text-embedding-ada-002. \n"
         "Only use required parameters in payloads.\n"
