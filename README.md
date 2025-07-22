@@ -14,11 +14,11 @@ This tool helps you dissect the OpenAI API specification and generate curl comma
 
 ### Step 1: Get the OpenAPI spec file
 ```
-curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml
+curl -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/manual_spec/openapi.yaml
 ```
 ### Step 2: Convert if necessary
 ```
-yq . openapi.yaml >openapi.json
+python3 -c "import yaml, json; print(json.dumps(yaml.safe_load(open('openapi.yaml')), indent=2))" > openapi.json
 ```
 ### Step 3: Extract the Base URL
 ```

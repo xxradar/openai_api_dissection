@@ -6,10 +6,10 @@ if [ -f "openapi.json" ]; then
   echo "✅ openapi.json already exists. Skipping download and conversion."
 else
   echo "📥 Downloading OpenAI OpenAPI spec..."
-  curl -s -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml
+  curl -s -O https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/manual_spec/openapi.yaml
 
   echo "🔄 Converting YAML to JSON..."
-  yq eval -o=json '.' openapi.yaml | jq . > openapi.json
+  python3 -c "import yaml, json; print(json.dumps(yaml.safe_load(open('openapi.yaml')), indent=2))" > openapi.json
   echo "✅ Conversion complete: openapi.json created."
 fi
 
