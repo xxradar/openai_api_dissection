@@ -44,13 +44,14 @@ def main() -> None:
         "for the OpenAI REST API.\n"
         "Rules:\n"
         "- Output ONLY the curl command in a single ```bash block, no prose.\n"
-        "- Use the Bearer token via \"Authorization: Bearer $OPENAI_API_KEY\" (keep the shell variable).\n"
+        "- The auth header MUST be written exactly as -H \"Authorization: Bearer $OPENAI_API_KEY\" "
+        "(double quotes, so the shell expands the variable; never single-quote this header).\n"
         "- Build the URL from baseurl + endpoint. Replace {path_params} with realistic example IDs.\n"
         "- Use the given HTTP method. Send a body only for post/put/patch.\n"
         "- If content_type is multipart/form-data use -F fields, otherwise use -H 'Content-Type: application/json' and -d.\n"
         "- Include only the *required* body fields (plus a minimal example value for each).\n"
         f"- When a model is required use {DEFAULT_CHAT_MODEL}; for embeddings use {DEFAULT_EMBEDDING_MODEL}.\n"
-        "- Double-check shell quoting: single-quote the JSON body and avoid nested single quotes.\n"
+        "- Single-quote only the JSON body (-d '...') and avoid nested single quotes inside it.\n"
         "- If the operation is marked deprecated, add a one-line comment saying so above the command.\n"
     )
 
