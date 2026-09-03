@@ -48,7 +48,10 @@ echo "Base URL: $BASEURL"
 
 # The current spec lists some paths twice with a "?beta=true" query suffix;
 # hide those duplicates from the menu.
-mapfile -t ENDPOINTS < <(jq -r '.paths | keys[] | select(test("\\?") | not)' openapi.json)
+# (while/read instead of mapfile: macOS ships bash 3.2)
+ENDPOINTS=()
+while IFS= read -r line; do ENDPOINTS+=("$line"); done \
+  < <(jq -r '.paths | keys[] | select(test("\\?") | not)' openapi.json)
 
 echo -e "\nAvailable Endpoints (${#ENDPOINTS[@]}):"
 printf '%s\n' "${ENDPOINTS[@]}" | nl -w3 -s'. '
@@ -74,7 +77,7 @@ fi
 # Gather everything the model needs, resolving $refs so that the schema is
 # self-contained (the current spec builds most request bodies from allOf/$ref).
 OP_JSON=$(jq -c --arg p "$ENDPOINT" --arg m "$METHOD_LOWER" '.paths[$p][$m]' openapi.json)
-COMBINED_FILE=$(mktemp -t openai_dissect.XXXXXX.json)
+COMBINED_FILE=$(mktemp "${TMPDIR:-/tmp}/openai_dissect.XXXXXX")
 trap 'rm -f "$COMBINED_FILE"' EXIT
 
 python3 - "$OP_JSON" "$METHOD_LOWER" "$ENDPOINT" "$BASEURL" "$COMBINED_FILE" <<'PY'
