@@ -14,7 +14,7 @@ SPEC_BRANCH="${OPENAI_SPEC_BRANCH:-master}"
 # the frozen manual_spec branch.
 SPEC_URL="${OPENAI_SPEC_URL:-https://raw.githubusercontent.com/openai/openai-openapi/${SPEC_BRANCH}/openapi.yaml}"
 
-for tool in curl jq python3; do
+for tool in curl jq python3 grep mktemp nl awk sed tr; do
   command -v "$tool" >/dev/null || { echo "❌ '$tool' is required." >&2; exit 1; }
 done
 
@@ -95,8 +95,9 @@ def resolve(node, depth=0, seen=()):
             target = spec
             for part in ref.lstrip("#/").split("/"):
                 target = target[part]
-            merged = {k: v for k, v in node.items() if k != "$ref"}
-            merged.update(target if isinstance(target, dict) else {"value": target})
+            siblings = {k: v for k, v in node.items() if k != "$ref"}
+            base = target if isinstance(target, dict) else {"value": target}
+            merged = {**base, **siblings}
             return resolve(merged, depth + 1, seen + (ref,))
         return {k: resolve(v, depth + 1, seen) for k, v in node.items()
                 if k not in ("x-oaiMeta", "x-oaiTypeLabel", "example", "examples")}

@@ -64,7 +64,6 @@ def main() -> None:
             ),
             temperature=0,
         )
-        print("Generated curl command:\n")
         print(response.output_text.strip())
     except Exception as e:  # noqa: BLE001
         sys.exit(f"An error occurred: {e}")
