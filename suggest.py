@@ -1,56 +1,74 @@
+#!/usr/bin/env python3
+"""Ask a model to craft a curl command for one OpenAI API operation.
+
+Usage:
+    python3 suggest.py combined.json          # written by script.sh
+    COMBINED_JSON='{...}' python3 suggest.py  # legacy: JSON in an env var
+
+Environment:
+    OPENAI_API_KEY   required
+    SUGGEST_MODEL    model used to write the curl command (default: gpt-4.1)
+"""
+
+import json
 import os
+import sys
+
 from openai import OpenAI
 
-def main():
-    # Retrieve the OpenAI API key from the environment variable
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        print("Error: OPENAI_API_KEY environment variable is not set.")
-        return
+DEFAULT_MODEL = os.getenv("SUGGEST_MODEL", "gpt-4.1")
+# Models the generated curl should use, per endpoint family.
+DEFAULT_CHAT_MODEL = "gpt-4.1"
+DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
 
-    # Retrieve the JSON payload from the COMBINED_JSON environment variable
-    combined_json = os.getenv("COMBINED_JSON")
-    if not combined_json:
-        print("Error: COMBINED_JSON environment variable is not set.")
-        return
 
-    # Initialize the OpenAI API client
-    # Explicitly set only the api_key to avoid any unexpected configuration issues
-    client = OpenAI()
-    client.api_key = api_key
+def load_combined() -> dict:
+    if len(sys.argv) > 1:
+        with open(sys.argv[1]) as f:
+            return json.load(f)
+    raw = os.getenv("COMBINED_JSON")
+    if not raw:
+        sys.exit("Error: pass the combined JSON file as an argument or set COMBINED_JSON.")
+    return json.loads(raw)
 
-    # Construct the prompt for the model
-    prompt = (
-        "You are a command-line assistant.\n\n"
-        "I will provide you with a JSON object: \n\n"
-        f"{combined_json}\n\n"
-        "Craft a curl command based on this. \n" 
-        "The Bearer token is in $OPENAI_API_KEY\n"
-        "Do not use placeholders, use the actual values.\n"
-        "verify closely there are no quoting issues.\n"
-        "Always suggest - if required - model gpt-4o \n"
-        "For embedding related suggestions use text-embedding-ada-002. \n"
-        "Only use required parameters in payloads.\n"
+
+def main() -> None:
+    if not os.getenv("OPENAI_API_KEY"):
+        sys.exit("Error: OPENAI_API_KEY environment variable is not set.")
+
+    combined = load_combined()
+    client = OpenAI()  # picks up OPENAI_API_KEY (and OPENAI_BASE_URL) from the environment
+
+    instructions = (
+        "You are a command-line assistant that writes ready-to-run curl commands "
+        "for the OpenAI REST API.\n"
+        "Rules:\n"
+        "- Output ONLY the curl command in a single ```bash block, no prose.\n"
+        "- Use the Bearer token via \"Authorization: Bearer $OPENAI_API_KEY\" (keep the shell variable).\n"
+        "- Build the URL from baseurl + endpoint. Replace {path_params} with realistic example IDs.\n"
+        "- Use the given HTTP method. Send a body only for post/put/patch.\n"
+        "- If content_type is multipart/form-data use -F fields, otherwise use -H 'Content-Type: application/json' and -d.\n"
+        "- Include only the *required* body fields (plus a minimal example value for each).\n"
+        f"- When a model is required use {DEFAULT_CHAT_MODEL}; for embeddings use {DEFAULT_EMBEDDING_MODEL}.\n"
+        "- Double-check shell quoting: single-quote the JSON body and avoid nested single quotes.\n"
+        "- If the operation is marked deprecated, add a one-line comment saying so above the command.\n"
     )
 
     try:
-        # Make a request to the OpenAI Chat Completions API
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that generates curl commands."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0
+        response = client.responses.create(
+            model=DEFAULT_MODEL,
+            instructions=instructions,
+            input=(
+                "Operation description (OpenAPI, refs already resolved):\n\n"
+                + json.dumps(combined, indent=1)
+            ),
+            temperature=0,
         )
+        print("Generated curl command:\n")
+        print(response.output_text.strip())
+    except Exception as e:  # noqa: BLE001
+        sys.exit(f"An error occurred: {e}")
 
-        # Extract and print the generated curl command
-        curl_command = response.choices[0].message.content.strip()
-        print("Generated curl command:")
-        print(curl_command)
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
